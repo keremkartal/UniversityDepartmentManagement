@@ -6,6 +6,120 @@
 Bu proje, bir üniversite bölümünün akademik ve idari operasyonlarını dijitalleştirmek, otomatize etmek ve verimliliği artırmak amacıyla geliştirilmiş, modern ve kapsamlı bir web uygulamasıdır. **ASP.NET Core 8 Web API** ve **React** teknolojileri üzerine inşa edilen bu sistem, ders programlarından sınav organizasyonuna, akademik personel yönetiminden derslik planlamasına kadar geniş bir yelpazede çözümler sunar.
 
 Sistem, rol tabanlı erişim kontrolü sayesinde farklı yetkilere sahip kullanıcıların (Bölüm Başkanı, Bölüm Sekreteri ve Öğretim Elemanı) sadece kendi sorumluluk alanlarına giren işlemleri yapabilmesini sağlayarak veri güvenliğini ve iş akışı düzenini temin eder.
+
+##  Veritabanı Şeması ve İlişkileri
+
+Entity Framework Core Code-First yaklaşımı ile tasarlanan veritabanı şeması, sistemin temelini oluşturur. Varlıklar arasındaki ilişkiler, akademik süreçlerin bütünlüğünü sağlar.
+
+```mermaid
+erDiagram
+    UniversityUser {
+        string Id PK "Kullanıcı ID (GUID)"
+        string Name "Ad"
+        string SurName "Soyad"
+        int SicilNo "Sicil Numarası (Unique)"
+        string Email "E-posta (Unique)"
+        string PasswordHash "Şifre Karması"
+    }
+
+    UniversityRole {
+        string Id PK "Rol ID (GUID)"
+        string Name "Rol Adı (Chair, Instructor, vb.)"
+    }
+
+    AspNetUserRoles {
+        string UserId FK "Kullanıcı ID"
+        string RoleId FK "Rol ID"
+    }
+
+    Classroom {
+        int Id PK "Derslik ID"
+        string Name "Derslik Adı (Unique)"
+        int Capacity "Kapasite"
+        int Columns "Oturma Düzeni Sütun Sayısı"
+        int SeatsPerColumn "Sütun Başına Koltuk"
+    }
+
+    Lecture {
+        int Id PK "Ders ID"
+        string Name "Ders Adı (Unique)"
+        string LectureCode "Ders Kodu (Unique)"
+        string Language "Eğitim Dili"
+        int StudentNumber "Öğrenci Sayısı"
+        int ClassroomId FK "Derslik ID"
+        string InstructorId FK "Öğretim Elemanı ID"
+    }
+
+    LectureSchedule {
+        int Id PK "Program ID"
+        DayOfWeek Day "Gün"
+        TimeSpan StartTime "Başlangıç Saati"
+        TimeSpan EndTime "Bitiş Saati"
+        int Grade "Sınıf Seviyesi"
+        string Semester "Dönem (Güz/Bahar)"
+        int LectureId FK "Ders ID"
+    }
+
+    Exam {
+        int Id PK "Sınav ID"
+        DateTime ExamDate "Sınav Tarihi"
+        TimeSpan StartTime "Başlangıç Saati"
+        TimeSpan EndTime "Bitiş Saati"
+        int Grade "Sınıf Seviyesi"
+        string Semester "Dönem"
+        int LectureId FK "Ders ID"
+        int ClassroomId FK "Derslik ID"
+        string SupervisorId FK "Gözetmen ID"
+    }
+
+    Comment {
+        int Id PK "Yorum ID"
+        string Content "Yorum İçeriği"
+        DateTime CreatedAt "Oluşturulma Tarihi"
+        string InstructorId FK "Öğretim Elemanı ID"
+        int ExamId FK "Sınav ID"
+    }
+
+    UniversityUser ||--|{ AspNetUserRoles : "has"
+    UniversityRole ||--|{ AspNetUserRoles : "has"
+    UniversityUser ||--o{ Lecture : "is instructor for"
+    UniversityUser ||--o{ Exam : "is supervisor for"
+    UniversityUser ||--o{ Comment : "writes"
+    Classroom ||--o{ Lecture : "hosts"
+    Classroom ||--o{ Exam : "hosts"
+    Lecture ||--o{ LectureSchedule : "is scheduled in"
+    Lecture ||--o{ Exam : "has"
+    Exam ||--o{ Comment : "has"
+
+```
+
+##  Proje Yapısı
+
+Proje, `Server` ve `Client` olmak üzere iki ana klasörden oluşur.
+
+```
+/UniversityDepartmentManagement
+├── UniversityDepartmentManagement.Server/  # ASP.NET Core Backend Projesi
+│   ├── Controllers/                        # API endpoint'leri
+│   ├── Data/                               # DbContext, Seeder ve Identity sınıfları
+│   ├── Entities/                           # Veritabanı varlıkları (modeller)
+│   ├── Migrations/                         # EF Core veritabanı geçişleri
+│   ├── Models/                             # DTO (Data Transfer Objects)
+│   ├── Properties/                         # Proje ayarları (launchSettings.json)
+│   ├── Program.cs                          # Uygulama başlangıç ve konfigürasyon dosyası
+│   └── appsettings.json                    # Konfigürasyon (veritabanı, JWT vb.)
+│
+└── universitydepartmentmanagement.client/    # React Frontend Projesi
+    ├── public/                             # Statik dosyalar
+    └── src/                                # React uygulama kaynak kodları
+        ├── Components/                     # Yeniden kullanılabilir React bileşenleri
+        ├── Contexts/                       # React Context API (AuthContext)
+        ├── CSS/                            # Stil dosyaları
+        ├── App.jsx                         # Ana uygulama bileşeni ve yönlendirme
+        ├── main.jsx                        # Uygulama giriş noktası
+        └── vite.config.js                  # Vite konfigürasyon dosyası
+```
+
 ##  Kurulum ve Çalıştırma
 
 ### Ön Gereksinimler
@@ -122,119 +236,6 @@ Tüm roller tarafından erişilebilir, yetkiye göre işlevler kısıtlıdır.
   - **Sınav Planlama:** Sınavlar için tarih, saat, derslik ve gözetmen ataması yapma.
   - **Çakışma Önleme:** Sınav planlaması sırasında derslik ve gözetmen çakışmalarını otomatik olarak kontrol etme.
   - **Yorum Sistemi:** Öğretim elemanlarının sınavlar hakkında notlar veya yorumlar ekleyebilmesi.
-
-##  Veritabanı Şeması ve İlişkileri
-
-Entity Framework Core Code-First yaklaşımı ile tasarlanan veritabanı şeması, sistemin temelini oluşturur. Varlıklar arasındaki ilişkiler, akademik süreçlerin bütünlüğünü sağlar.
-
-```mermaid
-erDiagram
-    UniversityUser {
-        string Id PK "Kullanıcı ID (GUID)"
-        string Name "Ad"
-        string SurName "Soyad"
-        int SicilNo "Sicil Numarası (Unique)"
-        string Email "E-posta (Unique)"
-        string PasswordHash "Şifre Karması"
-    }
-
-    UniversityRole {
-        string Id PK "Rol ID (GUID)"
-        string Name "Rol Adı (Chair, Instructor, vb.)"
-    }
-
-    AspNetUserRoles {
-        string UserId FK "Kullanıcı ID"
-        string RoleId FK "Rol ID"
-    }
-
-    Classroom {
-        int Id PK "Derslik ID"
-        string Name "Derslik Adı (Unique)"
-        int Capacity "Kapasite"
-        int Columns "Oturma Düzeni Sütun Sayısı"
-        int SeatsPerColumn "Sütun Başına Koltuk"
-    }
-
-    Lecture {
-        int Id PK "Ders ID"
-        string Name "Ders Adı (Unique)"
-        string LectureCode "Ders Kodu (Unique)"
-        string Language "Eğitim Dili"
-        int StudentNumber "Öğrenci Sayısı"
-        int ClassroomId FK "Derslik ID"
-        string InstructorId FK "Öğretim Elemanı ID"
-    }
-
-    LectureSchedule {
-        int Id PK "Program ID"
-        DayOfWeek Day "Gün"
-        TimeSpan StartTime "Başlangıç Saati"
-        TimeSpan EndTime "Bitiş Saati"
-        int Grade "Sınıf Seviyesi"
-        string Semester "Dönem (Güz/Bahar)"
-        int LectureId FK "Ders ID"
-    }
-
-    Exam {
-        int Id PK "Sınav ID"
-        DateTime ExamDate "Sınav Tarihi"
-        TimeSpan StartTime "Başlangıç Saati"
-        TimeSpan EndTime "Bitiş Saati"
-        int Grade "Sınıf Seviyesi"
-        string Semester "Dönem"
-        int LectureId FK "Ders ID"
-        int ClassroomId FK "Derslik ID"
-        string SupervisorId FK "Gözetmen ID"
-    }
-
-    Comment {
-        int Id PK "Yorum ID"
-        string Content "Yorum İçeriği"
-        DateTime CreatedAt "Oluşturulma Tarihi"
-        string InstructorId FK "Öğretim Elemanı ID"
-        int ExamId FK "Sınav ID"
-    }
-
-    UniversityUser ||--|{ AspNetUserRoles : "has"
-    UniversityRole ||--|{ AspNetUserRoles : "has"
-    UniversityUser ||--o{ Lecture : "is instructor for"
-    UniversityUser ||--o{ Exam : "is supervisor for"
-    UniversityUser ||--o{ Comment : "writes"
-    Classroom ||--o{ Lecture : "hosts"
-    Classroom ||--o{ Exam : "hosts"
-    Lecture ||--o{ LectureSchedule : "is scheduled in"
-    Lecture ||--o{ Exam : "has"
-    Exam ||--o{ Comment : "has"
-
-```
-
-##  Proje Yapısı
-
-Proje, `Server` ve `Client` olmak üzere iki ana klasörden oluşur.
-
-```
-/UniversityDepartmentManagement
-├── UniversityDepartmentManagement.Server/  # ASP.NET Core Backend Projesi
-│   ├── Controllers/                        # API endpoint'leri
-│   ├── Data/                               # DbContext, Seeder ve Identity sınıfları
-│   ├── Entities/                           # Veritabanı varlıkları (modeller)
-│   ├── Migrations/                         # EF Core veritabanı geçişleri
-│   ├── Models/                             # DTO (Data Transfer Objects)
-│   ├── Properties/                         # Proje ayarları (launchSettings.json)
-│   ├── Program.cs                          # Uygulama başlangıç ve konfigürasyon dosyası
-│   └── appsettings.json                    # Konfigürasyon (veritabanı, JWT vb.)
-│
-└── universitydepartmentmanagement.client/    # React Frontend Projesi
-    ├── public/                             # Statik dosyalar
-    └── src/                                # React uygulama kaynak kodları
-        ├── Components/                     # Yeniden kullanılabilir React bileşenleri
-        ├── Contexts/                       # React Context API (AuthContext)
-        ├── CSS/                            # Stil dosyaları
-        ├── App.jsx                         # Ana uygulama bileşeni ve yönlendirme
-        ├── main.jsx                        # Uygulama giriş noktası
-        └── vite.config.js                  # Vite konfigürasyon dosyası
-```
 
 
 
