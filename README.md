@@ -155,6 +155,15 @@ Proje, `Server` ve `Client` olmak üzere iki ana klasörden oluşur.
         npm run dev
         ```
       - Tarayıcınızda `https://localhost:50230` (veya terminalde belirtilen port) adresine gidin. Frontend, backend API'si ile otomatik olarak iletişim kuracaktır.
+### Varsayılan Kullanıcılar
+
+Sistem ilk çalıştığında aşağıdaki varsayılan kullanıcılar oluşturulur:
+
+| Rol                    | E-posta                       | Şifre                   |
+| ---------------------- | ----------------------------- | ----------------------- |
+| Bölüm Başkanı (Chair)  | `dean@university.edu.tr`      | `DeanPassword123!`      |
+| Bölüm Sekreteri        | `secretary@university.edu.tr` | `SecretaryPassword123!` |
+| Öğretim Elemanı (Instructor) | `faculty@university.edu.tr`   | `FacultyPassword123!`   |
 
 ##  Mimari ve Teknoloji Stack'i
 
@@ -236,8 +245,4 @@ Tüm roller tarafından erişilebilir, yetkiye göre işlevler kısıtlıdır.
   - **Sınav Planlama:** Sınavlar için tarih, saat, derslik ve gözetmen ataması yapma.
   - **Çakışma Önleme:** Sınav planlaması sırasında derslik ve gözetmen çakışmalarını otomatik olarak kontrol etme.
   - **Yorum Sistemi:** Öğretim elemanlarının sınavlar hakkında notlar veya yorumlar ekleyebilmesi.
-
-
-
-
 
