@@ -246,3 +246,19 @@ Tüm roller tarafından erişilebilir, yetkiye göre işlevler kısıtlıdır.
   - **Çakışma Önleme:** Sınav planlaması sırasında derslik ve gözetmen çakışmalarını otomatik olarak kontrol etme.
   - **Yorum Sistemi:** Öğretim elemanlarının sınavlar hakkında notlar veya yorumlar ekleyebilmesi.
 
+
+<img width="919" height="715" alt="image" src="https://github.com/user-attachments/assets/38d992f6-9bb4-44cd-be82-39f64431887c" />
+
+<img width="1046" height="492" alt="image" src="https://github.com/user-attachments/assets/dae9a436-2dd7-4dc5-857a-db79e603a4ff" />
+
+<img width="1036" height="528" alt="image" src="https://github.com/user-attachments/assets/c9cefd60-5a78-48e0-a69c-d692c80349c1" />
+
+<img width="1025" height="461" alt="image" src="https://github.com/user-attachments/assets/78e5b84e-a6ce-4f21-983a-059199daeb9b" />
+
+<img width="1029" height="468" alt="image" src="https://github.com/user-attachments/assets/2cd70522-bb7e-4af1-9939-8eba128cc5a2" />
+
+<img width="1027" height="365" alt="image" src="https://github.com/user-attachments/assets/51eebd74-50b0-4071-b726-1f5530e53418" />
+
+<img width="1035" height="369" alt="image" src="https://github.com/user-attachments/assets/c9b22bc2-e60c-413e-9b1f-126ede522b8e" />
+
+
